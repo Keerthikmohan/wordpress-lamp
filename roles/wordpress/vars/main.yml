@@ -1,0 +1,12 @@
+---
+# vars file for wordpress
+
+http_port: 80
+doc_root: /var/www/html
+dest: /etc/apache2/sites-enabled/000-default.conf
+port_file: /etc/apache2/ports.conf
+domain: keerthinibin.tk
+http_user: www-data
+http_group: www-data
+https_port: 443
+wordpress_url: https://wordpress.org/latest.tar.gz

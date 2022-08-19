@@ -1,0 +1,114 @@
+---
+
+- name: Apache installation
+  apt:
+    name: apache2
+    state: present
+    update_cache: yes
+  notify: Restart Apache2
+
+- name: copying conf file
+  template:
+    src: default.conf.j2
+    dest: "{{ dest }}"
+
+- name: copying a file
+  template:
+   src: ports.conf.j2
+   dest: "{{ port_file }}"
+  notify: Restart Apache2
+
+
+- name: Removing old archive
+  file:
+    path: "{{ doc_root }}/{{ domain }}/"
+    state: absent
+
+- name: Creating document root
+  file:
+    path: "{{ doc_root }}/{{ domain }}"
+    state: directory
+    owner: "{{ http_user }}"
+    group: "{{ http_group }}"
+    mode: 0755
+  notify: Restart Apache2
+  become: yes
+
+#- name: Wordpress installation
+ # ansible.builtin.get_url:
+  #  url: "{{ wordpress_url }}"
+   # dest: "{{ doc_root }}/{{ domain }}"
+   # owner: "{{ http_user }}"
+   # group: "{{ http_group }}"
+- name: installing unzip
+  ansible.builtin.apt:
+    name: unzip
+    state: present
+
+- name: Extract wordpress file in /var/www/html/domain
+  ansible.builtin.unarchive:
+    src: "{{ wordpress_url }}"
+    dest: "{{ doc_root }}/{{ domain }}"
+    remote_src: yes
+    owner: "{{ http_user }}"
+    group: "{{ http_group }}"
+
+- name: copying files from wordpress to doc root
+  copy:
+     src: /var/www/html/keerthinibin.tk/wordpress/
+     dest: /var/www/html/keerthinibin.tk
+     remote_src: yes
+     owner: "{{ http_user }}"
+     group: "{{ http_group }}"
+  
+
+- name: copying wp-config
+  template:
+    src: wp-config.j2
+    dest: "{{ doc_root }}/{{ domain }}/wp-config.php"
+    owner: "{{ http_user }}"
+    group: "{{ http_group }}"
+    mode: 0644
+  
+#PHP installation
+- name: Installation install software-properties-common
+  apt: name=software-properties-common
+
+- name: "Repo PHP 7.4"
+  apt_repository:
+      repo: "ppa:ondrej/php"
+      state: present
+  
+- name: "Updating the repo"
+  apt: update_cache=yes
+  notify: Restart Apache2
+
+- name: Installation PHP 7.4
+  apt: name=php7.4 state=present
+
+- name: install lamp stack
+  apt: 
+      pkg:
+          - php7.4-mysql
+          - php7.4-curl
+          - php7.4-json
+          - php7.4-cgi
+          - php7.4-xsl
+          - php7.4-cgi
+          - php7.4-gd
+          - php7.4-mbstring
+          - php7.4-zip
+          - php7.4-xmlrpc
+          - php7.4-soap
+          - php7.4-intl
+          - libapache2-mod-php
+
+      state: present
+      update_cache: yes
+  
+     
+      
+ 
+
+
+

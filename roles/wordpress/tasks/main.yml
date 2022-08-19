@@ -1,0 +1,9 @@
+---
+# tasks file for wordpress
+
+- name: including mysql Task
+  include_tasks: mysql.yml
+
+- name: including apache tasks
+  include_tasks: apache.yml
+     

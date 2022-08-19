@@ -1,0 +1,27 @@
+---
+
+ - name: MYSQL
+   hosts: keerthi2
+   become: true
+
+   roles:
+    - wordpress
+   vars_prompt:
+
+   - name: my_sql_root_password
+     prompt: Enter mysql root password?
+     private: yes
+     default: keerthi
+
+   - name: my_sql_wp_user
+     prompt: Enter the wp user?
+     default: mywp
+
+   - name: my_wp_password
+     prompt: Enter wp password?
+     private: yes
+     default: keerthi2
+
+   - name: my_wp_db
+     prompt: Enter database name?
+     default: mywpdb

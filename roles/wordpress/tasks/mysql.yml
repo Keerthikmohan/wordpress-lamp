@@ -1,0 +1,89 @@
+---
+
+- name: Pre-requesties - python
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+     - python-pip
+     - python3-pip
+  
+    
+
+- name: installing pymysql is present #MySQL-python (Python 2.X) module is required
+  pip:
+     name: pymysql
+     state: present
+
+
+#- name: Add official APT repository
+ # apt_repository:
+ #   repo: "https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb"
+ #   update_cache: yes
+
+#- name: "Updating the repo"
+##  apt: update_cache=yes
+#- name: install repo
+  # hkp://pgp.mit.edu:80
+   #shell: sudo dpkg -i mysql-apt-config_0.8.12-1_all.deb
+ # update_cache: yes
+
+#- name: Add PGP key
+  #apt_key:
+ #   keyserver: hkp://pgp.mit.edu:80
+  #  id: 5072E1F5
+
+- name: MYSQL install
+  apt:
+    name: mysql-server
+    state: present
+    update_cache: yes
+
+- name: restaring MYSQL
+  service:
+    name: mysql
+    state: restarted
+    enabled: true
+
+- name: Resetting Mysql root pasword.
+  mysql_user:
+     login_user: "root"
+     login_password: "{{ my_sql_root_password }}"
+     user: "root"
+     password: "{{ my_sql_root_password }}"
+     login_unix_socket: /var/run/mysqld/mysqld.sock
+     state: present
+   #  host_all: true
+  become: yes
+
+- name: "Removing Anonymous Users"
+  mysql_user:
+      login_user: "root"
+      login_password: "{{ my_sql_root_password }}"
+      user: "{{ my_sql_wp_user }}"
+      state: absent
+
+- name: "Removing  databases"
+  mysql_db:
+        login_user: "root"
+        login_password: "{{ my_sql_root_password }}"
+        name: "{{ my_wp_db }}"
+        state: absent
+
+#- name: start up the mysql service  
+#  shell: service mysql start
+
+- name: creating Wordpress db
+  mysql_db:
+     login_user: "root"
+     login_password: "{{ my_sql_root_password }}"
+     name: "{{ my_wp_db }}"
+     state: present
+      
+- name: adding user to "{{ my_wp_db }}"
+  mysql_user:
+    login_user: "root"
+    login_password: "{{ my_sql_root_password }}"
+    name: "{{ my_sql_wp_user }}"
+    password: "{{ my_wp_password }}"
+    priv: '{{ my_wp_db }}.*:ALL,GRANT'    
